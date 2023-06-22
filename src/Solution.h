@@ -17,6 +17,7 @@ public:
   Solution() {}
   Solution(bool build); //equivalente ao método construção
   Solution(Solution *s); // Copia uma solução já existente
+  // ~Solution();
 
   double getCost();
   std::vector<int> *getSequence();

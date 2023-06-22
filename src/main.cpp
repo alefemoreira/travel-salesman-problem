@@ -10,11 +10,12 @@ using namespace std;
 Data *d;
 Solution *ILS(int maxIter, int maxIterIls) {
   Solution *bestOfAll = new Solution();
+  Solution *best, *s;
   bestOfAll->setCost(INFINITY);
 
   for (int i = 0; i < maxIter; i++) {
-    Solution *s = new Solution(true); // new Solution(true') is equivalent to
-    Solution *best = s;
+    s = new Solution(true); // new Solution(true') is equivalent to
+    best = s;
 
     int iterIls = 0;
     while (iterIls <= maxIterIls) {
@@ -22,14 +23,21 @@ Solution *ILS(int maxIter, int maxIterIls) {
       if (s->getCost() < best->getCost()) {
         best = s;
         iterIls = 0;
+      } else if (s != best) {
+        delete s;
       }
-      // s = best;
-      // s = Solution::disturbance(best);
+      s = Solution::disturbance(best);
       iterIls++;
+    }
+
+    if (s != best) {
+      delete s;
     }
 
     if (best->getCost() < bestOfAll->getCost()) {
       bestOfAll = best;
+    } else {
+      delete best;
     }
   }
   return bestOfAll;
@@ -62,7 +70,7 @@ int main(int argc, char **argv) {
   s = ILS(50, maxIterIls);
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
-  // s = ILS(1, 0);
+
   cout << "Solucao s = ";
   s->show();
   cout << "Custo solucao = " << s->getCost() << endl;

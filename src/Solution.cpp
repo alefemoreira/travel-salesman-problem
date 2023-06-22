@@ -72,6 +72,7 @@ Solution::Solution(bool build) {
 
     sequence.insert(sequence.begin() + selected.edge + 1, selected.node);
     v.erase(selected.it);
+    delete costs;
   }
 
   this->calculateCost();
@@ -113,10 +114,10 @@ void Solution::localSearch() {
 
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis(0, 3);
+  std::uniform_int_distribution<> dis;
 
   while (!NL.empty()) {
-    int n = dis(gen);
+    int n = dis(gen) % NL.size();
     switch (NL[n]) {
     case 1:
       improved = this->bestImprovementSwap();
@@ -130,9 +131,9 @@ void Solution::localSearch() {
     case 4:
       improved = this->bestImprovementOrOpt(3);
       break;
-      // case 5:
-      //   improved = this->bestImprovement2Opt();
-      //   break;
+    // case 5:
+    //   improved = this->bestImprovement2Opt();
+    //   break;
     }
     if (improved) {
       NL = {1, 2, 3, 4, 5};
@@ -157,26 +158,20 @@ Solution *Solution::disturbance(Solution *s) {
   dis = std::uniform_int_distribution<>(dimension / 2, dimension - sizeJ);
   int j = dis(gen);
 
-  std::vector<int> *sSequence = s->getSequence();
-
-  for (int c = 0; c < i; c++) {
-    solution->sequence[c] = (*sSequence)[c];
+  std::vector<int> *seq = solution->getSequence();
+  auto seqBegin = seq->begin();
+  for (int c = 0; c < sizeI; c++) {
+    int v = (*seq)[i];
+    seq->erase(seqBegin + i);
+    seq->insert(seqBegin + j - 1, v);
   }
 
-  for (int c = i, a = 0; c < i + sizeJ; c++, a++) {
-    solution->sequence[c] = (*sSequence)[j + a];
-  }
-
-  for (int c = i + sizeI, a = 0; c < j; c++, a++) {
-    solution->sequence[i + sizeJ + a] = (*sSequence)[c];
-  }
-
-  for (int c = j, a = 0; c < j + sizeI; c++, a++) {
-    solution->sequence[c] = (*sSequence)[i + a];
-  }
-
-  for (int c = j + sizeJ, a = 0; c <= dimension; c++, a++) {
-    solution->sequence[j + sizeI + a] = (*sSequence)[c];
+  for (int c = 0; c < sizeJ; c++) {
+    int v = (*seq)[j];
+    seq->erase(seqBegin + j);
+    seq->insert(seqBegin + i, v);
+    j++;
+    i++;
   }
 
   solution->calculateCost();
@@ -266,7 +261,7 @@ bool Solution::bestImprovementOrOpt(int size) {
   double bestDelta = 0;
   int bestI = 0, bestJ = 0;
 
-  for (int i = 1; i < sequence.size() - 1 - size; i++) {
+  for (int i = 1; i < sequence.size() - 2 - size; i++) {
     int vi = sequence[i];
     int viPrev = sequence[i - 1];
     int vi2 = sequence[i + size];
