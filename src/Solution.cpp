@@ -105,11 +105,7 @@ void Solution::show() {
 }
 
 void Solution::localSearch() {
-  // bool improved = false;
-  // do {
-  //   improved = this->bestImprovementOrOpt(3);
-  // } while (improved);
-  std::vector<int> NL = {1, 2, 3, 4};
+  std::vector<int> NL = {1, 2, 3, 4, 5};
   bool improved = false;
 
   std::random_device rd;
@@ -131,9 +127,9 @@ void Solution::localSearch() {
     case 4:
       improved = this->bestImprovementOrOpt(3);
       break;
-    // case 5:
-    //   improved = this->bestImprovement2Opt();
-    //   break;
+    case 5:
+      improved = this->bestImprovement2Opt();
+      break;
     }
     if (improved) {
       NL = {1, 2, 3, 4, 5};
@@ -235,8 +231,6 @@ bool Solution::bestImprovement2Opt() { // de lado por enquanto
     }
   }
   if (bestDelta < 0 && bestI != lastI && bestJ != lastJ) {
-    // cout << "i: " << bestI << "; j: " << bestJ << "; delta: " << bestDelta <<
-    // ";\n";
     lastI = bestI;
     lastJ = bestJ;
     this->twoOptSwap(bestI, bestJ);
