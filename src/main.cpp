@@ -71,6 +71,8 @@ int main(int argc, char **argv) {
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
 
+  cout << "------------\n";
+  s->calculateCost();
   cout << "Solucao s = ";
   s->show();
   cout << "Custo solucao = " << s->getCost() << endl;
