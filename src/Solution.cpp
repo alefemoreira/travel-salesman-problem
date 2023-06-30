@@ -2,6 +2,7 @@
 #include "Data.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <list>
@@ -156,19 +157,43 @@ Solution *Solution::disturbance(Solution *s) {
 
   std::vector<int> *seq = solution->getSequence();
   auto seqBegin = seq->begin();
-  for (int c = 0; c < sizeI; c++) {
-    int v = (*seq)[i];
-    seq->erase(seqBegin + i);
-    seq->insert(seqBegin + j - 1, v);
+
+  int lesser = sizeI < sizeJ ? sizeI : sizeJ;
+  // printf("I: %d, J: %d, sizeI: %d, sizeJ: %d; [i]: %d, [j]: %d, \n", i, j,
+  //        sizeI, sizeJ, (*seq)[i], (*seq)[j]);
+  // s->show();
+
+  for (int c = 0; c < lesser; c++) {
+    swap((*seq)[i + c], (*seq)[j + c]);
   }
 
-  for (int c = 0; c < sizeJ; c++) {
-    int v = (*seq)[j];
-    seq->erase(seqBegin + j);
-    seq->insert(seqBegin + i, v);
-    j++;
-    i++;
+  bool IisLess = sizeI < sizeJ;
+  bool JisLess = sizeJ < sizeI;
+
+  if (IisLess) {
+    i += sizeI;
+    j += sizeI;
+    for (int c = 0; c < sizeJ - sizeI; c++) {
+      int v = (*seq)[j];
+      seq->erase(seqBegin + j);
+      seq->insert(seqBegin + i, v);
+      j++;
+      i++;
+    }
   }
+
+  if (JisLess) {
+    i += sizeJ;
+    j += sizeJ;
+    for (int c = 0; c < sizeI - sizeJ; c++) {
+      int v = (*seq)[i];
+      seq->erase(seqBegin + i);
+      seq->insert(seqBegin + j - 1, v);
+      // j++;
+    }
+  }
+  // printf("----\n");
+  // solution->show();
 
   solution->calculateCost();
 
