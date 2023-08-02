@@ -2,6 +2,7 @@
 #include "Solution.h"
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <ratio>
 #include <vector>
@@ -44,6 +45,7 @@ Solution *ILS(int maxIter, int maxIterIls) {
 }
 
 int main(int argc, char **argv) {
+  // srand(time(0));
   d = new Data(argc, argv[1]);
   d->read();
   size_t n = d->getDimension();

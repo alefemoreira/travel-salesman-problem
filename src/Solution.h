@@ -3,11 +3,12 @@
 
 #include "Data.h"
 #include <iterator>
+#include <list>
 #include <vector>
 
 struct InsertionCost {
   int node;
-  int edge;
+  std::list<int>::iterator edge;
   double cost;
   std::vector<int>::iterator it;
 };
@@ -15,14 +16,14 @@ struct InsertionCost {
 class Solution {
 public:
   Solution() {}
-  Solution(bool build); //equivalente ao método construção
+  Solution(bool build);  // equivalente ao método construção
   Solution(Solution *s); // Copia uma solução já existente
   // ~Solution();
 
   double getCost();
-  std::vector<int> *getSequence();
+  std::list<int> *getSequence();
 
-  void setSequence(std::vector<int> *v);
+  void setSequence(std::list<int> *v);
   void setCost(double c);
   void calculateCost();
   void show();
@@ -31,15 +32,15 @@ public:
   static Solution *disturbance(Solution *s);
 
 private:
-  std::vector<int> sequence;
+  std::list<int> sequence;
   double cost;
-  int lastI, lastJ;
+  list<int>::iterator lastI, lastJ;
 
   bool bestImprovementSwap();
   bool bestImprovement2Opt();
   bool bestImprovementOrOpt(int size);
-  void twoOptSwap(int i, int j);
-  void orOpt(int i, int j, int size);
+  void twoOptSwap(list<int>::iterator i, list<int>::iterator j);
+  void orOpt(list<int>::iterator i, list<int>::iterator j, int size);
 };
 
 #endif
