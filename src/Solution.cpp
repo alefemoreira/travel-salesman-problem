@@ -104,55 +104,47 @@ void Solution::show() {
 }
 
 void Solution::localSearch() {
+  std::vector<int> NL = {1, 2, 3, 4, 5};
   bool improved = false;
-  do {
-    improved = this->bestImprovementSwap();
-  } while (improved);
-  // std::vector<int> NL = {1, 2, 3, 4, 5};
-  // bool improved = false;
 
-  // std::random_device rd;
-  // std::mt19937 gen(rd());
-  // std::uniform_int_distribution<> dis;
-
-  // while (!NL.empty()) {
-  //   int n = dis(gen) % NL.size();
-  //   switch (NL[n]) {
-  //   case 1:
-  //     improved = this->bestImprovementSwap();
-  //     break;
-  //   case 2:
-  //     improved = this->bestImprovementOrOpt(1);
-  //     break;
-  //   case 3:
-  //     improved = this->bestImprovementOrOpt(2);
-  //     break;
-  //   case 4:
-  //     improved = this->bestImprovementOrOpt(3);
-  //     break;
-  //   case 5:
-  //     improved = this->bestImprovement2Opt();
-  //     break;
-  //   }
-  //   if (improved) {
-  //     NL = {1, 2, 3, 4, 5};
-  //   } else {
-  //     NL.erase(NL.begin() + n);
-  //   }
-  // };
+  while (!NL.empty()) {
+    int n = rand() % NL.size();
+    switch (NL[n]) {
+    case 1:
+      improved = this->bestImprovementSwap();
+      break;
+    case 2:
+      improved = this->bestImprovementOrOpt(1);
+      break;
+    case 3:
+      improved = this->bestImprovementOrOpt(2);
+      break;
+    case 4:
+      improved = this->bestImprovementOrOpt(3);
+      break;
+    case 5:
+      improved = this->bestImprovement2Opt();
+      break;
+    }
+    if (improved) {
+      NL = {1, 2, 3, 4, 5};
+    } else {
+      NL.erase(NL.begin() + n);
+    }
+  };
 }
 
 Solution *Solution::disturbance(Solution *s) {
   Solution *solution = new Solution(s); // copia a solução
   int dimension = s->sequence.size() - 1;
 
-  int sizeI = rand() % (dimension / 10 - 2) + 3;
-  int sizeJ = rand() % (dimension / 10 - 2) + 3;
+  int sizeI = rand() % ((int)ceil((double)dimension / 10) - 2) + 3;
+  int sizeJ = rand() % ((int)ceil((double)dimension / 10) - 2) + 3;
 
-  int i =
-      rand() % (dimension / 2 - sizeI - 1) + 1; // [1, dimension / 2 - sizeI]
-  int j = dimension / 2 + rand() % (dimension / 2 - sizeJ - 1) +
-          1; // [dimension / 2 + 1, seq.size - 1]
+  // [1, dimension / 2 - sizeI]
+  int i = rand() % (dimension / 2 - sizeI - 1) + 1;
+  // // [dimension / 2 + 1, seq.size - 1]
+  int j = dimension / 2 + rand() % (dimension / 2 - sizeJ - 1) + 1;
 
   std::list<int> *seq = solution->getSequence();
   auto seqBegin = seq->begin();
@@ -176,8 +168,9 @@ bool Solution::bestImprovementSwap() {
   list<int>::iterator bestI, bestJ;
   list<int>::iterator begin = this->sequence.begin();
   list<int>::iterator pback = prev(this->sequence.end(), 2);
+  list<int>::iterator stop = prev(pback, 2);
 
-  for (auto i = next(begin); i != prev(pback, 2); i++) {
+  for (auto i = next(begin); i != stop; i++) {
     int vi = *i;
     int viNext = *next(i);
     int viPrev = *prev(i);
@@ -215,18 +208,22 @@ bool Solution::bestImprovement2Opt() { // de lado por enquanto
   int bestDelta = 0;
   list<int>::iterator bestI, bestJ;
   list<int>::iterator begin = sequence.begin();
-  list<int>::iterator pback = prev(sequence.end(), 2);
+  list<int>::iterator pback =
+      prev(sequence.end(), 2); // pback mean previous back
+  list<int>::iterator stop = prev(pback, 2);
 
-  for (auto i = begin; i != pback; i++) {
+  for (auto i = next(begin); i != stop; i++) {
     int vi = *i;
-    int viNext = *next(i);
-    // + 2, because cannot be adjacents
+    int viPrev = *prev(i);
+
+    double distanceViPrevVi = d->getDistance(viPrev, vi);
+
     for (auto j = next(i, 2); j != pback; j++) {
       int vj = *j;
       int vjNext = *next(j);
 
-      double delta = d->getDistance(viNext, vjNext) + d->getDistance(vj, vj) -
-                     d->getDistance(vi, viNext) - d->getDistance(vj, vjNext);
+      double delta = d->getDistance(vi, vjNext) + d->getDistance(vj, viPrev) -
+                     d->getDistance(vj, vjNext) - distanceViPrevVi;
 
       if (delta < bestDelta) {
         bestDelta = delta;
@@ -235,10 +232,8 @@ bool Solution::bestImprovement2Opt() { // de lado por enquanto
       }
     }
   }
-  if (bestDelta < 0 && bestI != lastI && bestJ != lastJ) {
-    lastI = bestI;
-    lastJ = bestJ;
-    this->twoOptSwap(bestI, bestJ);
+  if (bestDelta < 0) {
+    this->performTwoOptSwap(bestI, bestJ);
     this->cost += bestDelta;
     return true;
   }
@@ -253,8 +248,9 @@ bool Solution::bestImprovementOrOpt(int size) {
   list<int>::iterator bestI, bestJ;
   list<int>::iterator begin = sequence.begin();
   list<int>::iterator pback = prev(sequence.end());
+  list<int>::iterator stop = prev(pback, size);
 
-  for (auto i = next(begin); i != prev(pback, size); i++) {
+  for (auto i = next(begin); i != stop; i++) {
     int vi = *i;
     int viPrev = *prev(i);
 
@@ -284,7 +280,7 @@ bool Solution::bestImprovementOrOpt(int size) {
   }
 
   if (bestDelta < 0) {
-    this->orOpt(bestI, bestJ, size);
+    this->performOrOpt(bestI, bestJ, size);
     this->cost += bestDelta;
     return true;
   }
@@ -292,17 +288,14 @@ bool Solution::bestImprovementOrOpt(int size) {
   return false;
 }
 
-void Solution::twoOptSwap(list<int>::iterator i, list<int>::iterator j) {
-  while (i != j || next(i) != j) {
-    std::iter_swap(i, j);
-    i++;
-    j--;
-  }
+void Solution::performTwoOptSwap(list<int>::iterator i, list<int>::iterator j) {
+  std::reverse(i, next(j));
 }
 
-void Solution::orOpt(list<int>::iterator i, list<int>::iterator j, int size) {
+void Solution::performOrOpt(list<int>::iterator i, list<int>::iterator j,
+                            int size) {
   sequence.splice(next(j), sequence, i, next(i, size));
   if (size >= 2) {
-    iter_swap(next(j), next(j, size - 1));
+    iter_swap(next(j), next(j, size));
   }
 }

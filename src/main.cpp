@@ -45,18 +45,11 @@ Solution *ILS(int maxIter, int maxIterIls) {
 }
 
 int main(int argc, char **argv) {
-  // srand(time(0));
+  srand(time(0));
   d = new Data(argc, argv[1]);
   d->read();
   size_t n = d->getDimension();
 
-  cout << "Dimension: " << n << endl;
-
-  Solution *s = new Solution(true);
-  cout << "Solucao s = ";
-  s->show();
-  s->calculateCost();
-  cout << "Custo solucao = " << s->getCost() << endl;
   int maxIterIls = n;
 
   if (n > 150) {
@@ -69,16 +62,12 @@ int main(int argc, char **argv) {
   using std::chrono::milliseconds;
 
   auto start = std::chrono::high_resolution_clock::now();
-  s = ILS(50, maxIterIls);
+  Solution *s = ILS(50, maxIterIls);
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
 
-  cout << "------------\n";
-  s->calculateCost();
-  cout << "Solucao s = ";
-  s->show();
-  cout << "Custo solucao = " << s->getCost() << endl;
-  cout << "Tempo de execução = " << duration_.count() / 1000 << " seg" << endl;
+  cout << d->getInstanceName() << ';' << s->getCost() << ';'
+       << duration_.count() / 1000 << endl;
 
   return 0;
 }

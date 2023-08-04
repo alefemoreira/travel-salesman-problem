@@ -34,13 +34,12 @@ public:
 private:
   std::list<int> sequence;
   double cost;
-  list<int>::iterator lastI, lastJ;
 
   bool bestImprovementSwap();
   bool bestImprovement2Opt();
   bool bestImprovementOrOpt(int size);
-  void twoOptSwap(list<int>::iterator i, list<int>::iterator j);
-  void orOpt(list<int>::iterator i, list<int>::iterator j, int size);
+  void performTwoOptSwap(list<int>::iterator i, list<int>::iterator j);
+  void performOrOpt(list<int>::iterator i, list<int>::iterator j, int size);
 };
 
 #endif
