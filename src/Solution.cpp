@@ -65,8 +65,8 @@ Solution::Solution(bool build) {
 
     // dis(gen) generates random number following normal distribuission
     double alpha = (double)rand() / RAND_MAX;
-    int selected_index = rand() % ((int)ceil(alpha * costs->size()));
-    InsertionCost selected = (*costs)[selected_index];
+    int selectedIndex = rand() % ((int)ceil(alpha * costs->size()));
+    InsertionCost selected = (*costs)[selectedIndex];
 
     sequence.insert(next(selected.edge), selected.node);
     v.erase(selected.it);
@@ -138,8 +138,11 @@ Solution *Solution::disturbance(Solution *s) {
   Solution *solution = new Solution(s); // copia a solução
   int dimension = s->sequence.size() - 1;
 
-  int sizeI = rand() % ((int)ceil((double)dimension / 10) - 2) + 3;
-  int sizeJ = rand() % ((int)ceil((double)dimension / 10) - 2) + 3;
+  int lowerBound = 2;
+  int upperBound = std::ceil(static_cast<double>(dimension) / 10);
+
+  int sizeI = rand() % (upperBound - lowerBound + 1) + lowerBound;
+  int sizeJ = rand() % (upperBound - lowerBound + 1) + lowerBound;
 
   // [1, dimension / 2 - sizeI]
   int i = rand() % (dimension / 2 - sizeI - 1) + 1;
