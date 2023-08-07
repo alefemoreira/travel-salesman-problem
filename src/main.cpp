@@ -66,8 +66,14 @@ int main(int argc, char **argv) {
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
 
-  cout << d->getInstanceName() << ';' << s->getCost() << ';'
-       << duration_.count() / 1000 << endl;
+  cout << "Solução: ";
+  s->show();
+
+  cout << "Custo  : " << s->getCost() << endl;
+  cout << "Tempo  : " << duration_.count() / 1000 << " segundos" << endl;
+
+  // cout << d->getInstanceName() << ';' << s->getCost() << ';'
+  //      << duration_.count() / 1000 << endl;
 
   return 0;
 }
