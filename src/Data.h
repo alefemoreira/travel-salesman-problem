@@ -11,8 +11,10 @@ using namespace std;
 
 class Data {
 public:
-  Data(int, char *);
   ~Data();
+
+  static void create(int qtParam, char *instance);
+  static Data *getInstance();
 
   void read();
   void printMatrixDist();
@@ -26,6 +28,8 @@ public:
   string getInstanceName(); // Get instance's name
 
 private:
+  Data(int, char *);
+  static Data *instance;
   string instaceName;
   int nbOfPar;
 

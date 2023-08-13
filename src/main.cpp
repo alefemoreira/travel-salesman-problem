@@ -1,5 +1,5 @@
 #include "Data.h"
-#include "Solution.h"
+#include "TSPSolution.h"
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -9,13 +9,13 @@
 
 using namespace std;
 Data *d;
-Solution *ILS(int maxIter, int maxIterIls) {
-  Solution *bestOfAll = new Solution();
-  Solution *best, *s;
+TSPSolution *ILS(int maxIter, int maxIterIls) {
+  TSPSolution *bestOfAll = new TSPSolution();
+  TSPSolution *best, *s;
   bestOfAll->setCost(INFINITY);
 
   for (int i = 0; i < maxIter; i++) {
-    s = new Solution(true); // new Solution(true') is equivalent to
+    s = new TSPSolution(true); // new TSPSolution(true') is equivalent to
     best = s;
 
     int iterIls = 0;
@@ -27,7 +27,7 @@ Solution *ILS(int maxIter, int maxIterIls) {
       } else if (s != best) {
         delete s;
       }
-      s = Solution::disturbance(best);
+      s = TSPSolution::disturbance(best);
       iterIls++;
     }
 
@@ -46,7 +46,9 @@ Solution *ILS(int maxIter, int maxIterIls) {
 
 int main(int argc, char **argv) {
   srand(time(0));
-  d = new Data(argc, argv[1]);
+  Data::create(argc, argv[1]);
+  Data *d = Data::getInstance();
+  TSPSolution::setReader(d);
   d->read();
   size_t n = d->getDimension();
 
@@ -62,7 +64,7 @@ int main(int argc, char **argv) {
   using std::chrono::milliseconds;
 
   auto start = std::chrono::high_resolution_clock::now();
-  Solution *s = ILS(50, maxIterIls);
+  TSPSolution *s = ILS(50, maxIterIls);
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
 
@@ -70,6 +72,8 @@ int main(int argc, char **argv) {
   s->show();
 
   cout << "Custo  : " << s->getCost() << endl;
+  s->calculateCost();
+  cout << "Custo recalculado  : " << s->getCost() << endl;
   cout << "Tempo  : " << duration_.count() / 1000 << " segundos" << endl;
 
   // cout << d->getInstanceName() << ';' << s->getCost() << ';'

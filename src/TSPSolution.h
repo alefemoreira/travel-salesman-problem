@@ -1,5 +1,5 @@
-#ifndef SOLUTION_H
-#define SOLUTION_H
+#ifndef TSP_SOLUTION_H
+#define TSP_SOLUTION_H
 
 #include "Data.h"
 #include <iterator>
@@ -13,11 +13,11 @@ struct InsertionCost {
   std::vector<int>::iterator it;
 };
 
-class Solution {
+class TSPSolution {
 public:
-  Solution() {}
-  Solution(bool build);  // equivalente ao método construção
-  Solution(Solution *s); // Copia uma solução já existente
+  TSPSolution() {}
+  TSPSolution(bool build);     // equivalente ao método construção
+  TSPSolution(TSPSolution *s); // Copia uma solução já existente
   // ~Solution();
 
   double getCost();
@@ -28,8 +28,11 @@ public:
   void calculateCost();
   void show();
   void localSearch();
+  bool isHamiltonTour();
 
-  static Solution *disturbance(Solution *s);
+  static TSPSolution *disturbance(TSPSolution *s);
+  static void setReader(Data *reader);
+  static Data *reader;
 
 private:
   std::list<int> sequence;
@@ -41,5 +44,7 @@ private:
   void performTwoOptSwap(list<int>::iterator i, list<int>::iterator j);
   void performOrOpt(list<int>::iterator i, list<int>::iterator j, int size);
 };
+
+bool validateCost(TSPSolution *s);
 
 #endif
