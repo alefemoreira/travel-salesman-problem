@@ -2,16 +2,10 @@
 #define TSP_SOLUTION_H
 
 #include "Data.h"
+#include <algorithm>
 #include <iterator>
 #include <list>
 #include <vector>
-
-struct InsertionCost {
-  int node;
-  std::list<int>::iterator edge;
-  double cost;
-  std::vector<int>::iterator it;
-};
 
 class TSPSolution {
 public:
@@ -31,8 +25,6 @@ public:
   bool isHamiltonTour();
 
   static TSPSolution *disturbance(TSPSolution *s);
-  static void setReader(Data *reader);
-  static Data *reader;
 
 private:
   std::list<int> sequence;
@@ -41,8 +33,17 @@ private:
   bool bestImprovementSwap();
   bool bestImprovement2Opt();
   bool bestImprovementOrOpt(int size);
-  void performTwoOptSwap(list<int>::iterator i, list<int>::iterator j);
-  void performOrOpt(list<int>::iterator i, list<int>::iterator j, int size);
+  void performTwoOptSwap(std::list<int>::iterator i,
+                         std::list<int>::iterator j) {
+    std::reverse(i, next(j));
+  }
+  void performOrOpt(std::list<int>::iterator i, std::list<int>::iterator j,
+                    int size) {
+    sequence.splice(next(j), sequence, i, next(i, size));
+    if (size >= 2) {
+      iter_swap(next(j), next(j, size));
+    }
+  }
 };
 
 bool validateCost(TSPSolution *s);

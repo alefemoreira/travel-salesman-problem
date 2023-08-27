@@ -26,10 +26,10 @@ public:
   inline bool getExplicitCoord() { return explicitCoord; };
 
   string getInstanceName(); // Get instance's name
+  static Data *instance;
 
 private:
   Data(int, char *);
-  static Data *instance;
   string instaceName;
   int nbOfPar;
 
