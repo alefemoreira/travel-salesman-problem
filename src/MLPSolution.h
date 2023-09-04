@@ -41,14 +41,14 @@ public:
   }
   void updateAllSubsequences();
 
+  bool bestImprovement2Opt();
+  bool bestImprovementSwap();
+  bool bestImprovementOrOpt(int size);
+
 private:
   std::list<int> sequence;
   std::vector<std::vector<Subsequence>> subsequences;
   double cost;
-
-  bool bestImprovementSwap();
-  bool bestImprovement2Opt();
-  bool bestImprovementOrOpt(int size);
 
   void updateSubsequences(int _i, list<int>::iterator _it, int _j,
                           list<int>::iterator _jt);

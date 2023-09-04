@@ -130,7 +130,8 @@ void MLPSolution::show() {
 void MLPSolution::localSearch() {
   // bool improved = false;
   // do {
-  //   improved = this->bestImprovement2Opt();
+  //   improved = this->bestImprovementOrOpt(1);
+
   // } while (improved);
   std::vector<int> NL = {1, 2, 3, 4, 5};
   bool improved = false;
@@ -231,7 +232,7 @@ void MLPSolution::updateSubsequences(int _i, list<int>::iterator _it, int _j,
           this->subsequences[i][j + 1], this->subsequences[j][j]);
   }
 
-  cout << subsequences[0][n - 1].C << endl;
+  // cout << subsequences[0][n - 1].C << endl;
 }
 
 void MLPSolution::updateAllSubsequences() {
@@ -302,14 +303,7 @@ bool MLPSolution::bestImprovementSwap() {
     this->cost = bestCost;
     // this->updateAllSubsequences();
     this->updateSubsequences(bestIndexI, bestI, bestIndexJ, bestJ);
-    bool isValid = validateCost(this);
-    if (!isValid) {
-      printf("SOLUCAO INVALIDA\n");
-      printf("custo: %f\n", bestCost);
-      printf("bestImprovement SWAP\n");
-      printf("(i, j) = (%d, %d)\n", bestIndexI, bestIndexJ);
-      printf("-----\n");
-    }
+
     return true;
   }
   return false;
@@ -318,7 +312,7 @@ bool MLPSolution::bestImprovementSwap() {
 bool MLPSolution::bestImprovement2Opt() { // de lado por enquanto
   int bestDelta = 0;
   int end = this->sequence.size() - 1;
-  double bestCost = this->subsequences[0][end].C;
+  double bestCost = this->cost;
 
   int bestIndexI, bestIndexJ;
   list<int>::iterator bestI, bestJ;
@@ -351,14 +345,7 @@ bool MLPSolution::bestImprovement2Opt() { // de lado por enquanto
     this->cost = bestCost;
     // this->updateAllSubsequences();
     this->updateSubsequences(bestIndexI, bestI, bestIndexJ, bestJ);
-    bool isValid = validateCost(this);
-    if (!isValid) {
-      printf("SOLUCAO INVALIDA\n");
-      printf("custo: %f\n", bestCost);
-      printf("bestImprovement 2 Opt\n");
-      printf("(i, j) = (%d, %d)\n", bestIndexI, bestIndexJ);
-      printf("-----\n");
-    }
+
     return true;
   }
   return false;
@@ -406,18 +393,13 @@ bool MLPSolution::bestImprovementOrOpt(int size) {
   }
 
   if (bestCost < this->cost) {
+    list<int>::iterator prevI = prev(bestI);
+    list<int>::iterator nextJ = next(bestJ);
+
     this->performOrOpt(bestI, bestJ, size);
     this->cost = bestCost;
-    // this->updateAllSubsequences();
-    this->updateSubsequences(bestIndexI, bestI, bestIndexJ, bestJ);
-    bool isValid = validateCost(this);
-    if (!isValid) {
-      printf("SOLUCAO INVALIDA\n");
-      printf("custo: %f\n", bestCost);
-      printf("bestImprovement Or Opt %d\n", size);
-      printf("(i, j) = (%d, %d)\n", bestIndexI, bestIndexJ);
-      printf("-----\n");
-    }
+    this->updateAllSubsequences();
+    this->updateSubsequences(bestIndexI, next(prevI), bestIndexJ, prev(nextJ));
     return true;
   }
 

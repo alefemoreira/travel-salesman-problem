@@ -128,13 +128,12 @@ void mlp(int n) {
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
 
-  // cout << "Solução: ";
-  s->show();
-
-  cout << "Custo  : " << s->getCost() << endl;
-  s->calculateCost();
-  cout << "Custo recalculado  : " << s->getCost() << endl;
-  cout << "Tempo  : " << duration_.count() / 1000 << " segundos" << endl;
+  cout << Data::instance->getInstanceName() << ';' << s->getCost() << ';'
+       << duration_.count() / 1000 << endl;
+  // cout << "Custo  : " << s->getCost() << endl;
+  // s->calculateCost();
+  // cout << "Custo recalculado  : " << s->getCost() << endl;
+  // cout << "Tempo  : " << duration_.count() / 1000 << " segundos" << endl;
 }
 
 int main(int argc, char **argv) {
@@ -144,13 +143,6 @@ int main(int argc, char **argv) {
   Data::create(argc, argv[1]);
   Data *d = Data::getInstance();
   d->read();
-
-  // MLPSolution *s = MLPSolution::build(0.15);
-  // s->show();
-
-  // s->bestImprovement2Opt();
-
-  // return 0;
 
   size_t n = d->getDimension();
 
