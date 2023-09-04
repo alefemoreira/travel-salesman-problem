@@ -15,7 +15,7 @@ struct InsertionCost {
 class Solution {
 public:
   Solution() {}
-  Solution(bool build); //equivalente ao método construção
+  Solution(bool build);  // equivalente ao método construção
   Solution(Solution *s); // Copia uma solução já existente
   // ~Solution();
 
@@ -38,8 +38,8 @@ private:
   bool bestImprovementSwap();
   bool bestImprovement2Opt();
   bool bestImprovementOrOpt(int size);
-  void twoOptSwap(int i, int j);
-  void orOpt(int i, int j, int size);
+  void performTwoOptSwap(vector<int>::iterator i, vector<int>::iterator j);
+  void performOrOpt(vector<int>::iterator i, vector<int>::iterator j, int size);
 };
 
 #endif

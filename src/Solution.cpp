@@ -54,21 +54,15 @@ Solution::Solution(bool build) {
   }
   sequence.push_back(1);
 
-  // initialize random generator; Uses Normal Distribution
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::normal_distribution<> dis(0.5, 0.1);
-
   while (!v.empty()) {
     std::vector<InsertionCost> *costs = calculateInsertionCosts(&sequence, &v);
     std::sort(costs->begin(), costs->end(),
               [](InsertionCost a, InsertionCost b) { return a.cost < b.cost; });
 
     // dis(gen) generates random number following normal distribuission
-    double alpha = dis(gen);
-
-    int selected_index = rand() % ((int)ceil(alpha * costs->size()));
-    InsertionCost selected = (*costs)[selected_index];
+    double alpha = (double)rand() / RAND_MAX;
+    int selectedIndex = rand() % ((int)ceil(alpha * costs->size()));
+    InsertionCost selected = (*costs)[selectedIndex];
 
     sequence.insert(sequence.begin() + selected.edge + 1, selected.node);
     v.erase(selected.it);
@@ -105,15 +99,15 @@ void Solution::show() {
 }
 
 void Solution::localSearch() {
+  // bool improved = false;
+  // do {
+  //   improved = this->bestImprovementOrOpt(3);
+  // } while (improved);
   std::vector<int> NL = {1, 2, 3, 4, 5};
   bool improved = false;
 
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis;
-
   while (!NL.empty()) {
-    int n = dis(gen) % NL.size();
+    int n = rand() % NL.size();
     switch (NL[n]) {
     case 1:
       improved = this->bestImprovementSwap();
@@ -142,17 +136,17 @@ void Solution::localSearch() {
 Solution *Solution::disturbance(Solution *s) {
   Solution *solution = new Solution(s); // copia a solução
   int dimension = s->sequence.size() - 1;
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis(2, ceil((float)dimension / 10));
 
-  int sizeI = dis(gen);
-  int sizeJ = dis(gen);
+  int lowerBound = 2;
+  int upperBound = std::ceil(static_cast<double>(dimension) / 10);
 
-  dis = std::uniform_int_distribution<>(1, dimension / 2 - sizeI);
-  int i = dis(gen);
-  dis = std::uniform_int_distribution<>(dimension / 2, dimension - sizeJ);
-  int j = dis(gen);
+  int sizeI = rand() % (upperBound - lowerBound + 1) + lowerBound;
+  int sizeJ = rand() % (upperBound - lowerBound + 1) + lowerBound;
+
+  // [1, dimension / 2 - sizeI]
+  int i = rand() % (dimension / 2 - sizeI - 1) + 1;
+  // // [dimension / 2 + 1, seq.size - 1]
+  int j = dimension / 2 + rand() % (dimension / 2 - sizeJ - 1) + 1;
 
   std::vector<int> *seq = solution->getSequence();
   auto seqBegin = seq->begin();
@@ -177,21 +171,34 @@ Solution *Solution::disturbance(Solution *s) {
 
 bool Solution::bestImprovementSwap() {
   double bestDelta = 0;
-  int bestI = 0, bestJ = 0;
+  vector<int>::iterator bestI, bestJ;
+  vector<int>::iterator begin = this->sequence.begin();
+  vector<int>::iterator back = prev(this->sequence.end(), 1);
+  vector<int>::iterator stop = prev(back);
 
-  for (int i = 1; i < this->sequence.size() - 1; i++) {
-    int vi = this->sequence[i];
-    int viNext = this->sequence[i + 1];
-    int viPrev = this->sequence[i - 1];
-    for (int j = i + 2; j < this->sequence.size() - 1; j++) {
-      int vj = this->sequence[j];
-      int vjNext = this->sequence[j + 1];
-      int vjPrev = this->sequence[j - 1];
+  for (auto i = next(begin); i != stop; i++) {
+    int vi = *i;
+    int viNext = *next(i);
+    int viPrev = *prev(i);
+
+    double costViViNext = d->getDistance(vi, viNext);
+    double costViPrevVi = d->getDistance(viPrev, vi);
+
+    vector<int>::iterator nextI = next(i);
+    for (auto j = nextI; j != back; j++) {
+      int vj = *j;
+      int vjNext = *next(j);
+      int vjPrev = *prev(j);
 
       double delta = d->getDistance(viPrev, vj) + d->getDistance(vj, viNext) +
                      d->getDistance(vjPrev, vi) + d->getDistance(vi, vjNext) -
-                     d->getDistance(viPrev, vi) - d->getDistance(vi, viNext) -
-                     d->getDistance(vjPrev, vj) - d->getDistance(vj, vjNext);
+                     costViPrevVi - costViViNext - d->getDistance(vjPrev, vj) -
+                     d->getDistance(vj, vjNext);
+
+      if (j == nextI) {
+        delta += 2 * costViViNext;
+      }
+
       if (delta < bestDelta) {
         bestDelta = delta;
         bestI = i;
@@ -201,7 +208,7 @@ bool Solution::bestImprovementSwap() {
   }
 
   if (bestDelta < 0) {
-    std::swap(this->sequence[bestI], this->sequence[bestJ]);
+    std::iter_swap(bestI, bestJ);
     this->cost += bestDelta;
     return true;
   }
@@ -210,18 +217,23 @@ bool Solution::bestImprovementSwap() {
 
 bool Solution::bestImprovement2Opt() { // de lado por enquanto
   int bestDelta = 0;
-  int bestI = 0, bestJ = 0;
+  vector<int>::iterator bestI, bestJ;
+  vector<int>::iterator begin = sequence.begin();
+  vector<int>::iterator back = prev(sequence.end());
+  vector<int>::iterator stop = prev(back, 3);
 
-  for (int i = 1; i < this->sequence.size() - 2; i++) {
-    int vi = this->sequence[i];
-    int viNext = this->sequence[i + 1];
-    // + 2, because cannot be adjacents
-    for (int j = i + 2; j < this->sequence.size() - 1; j++) {
-      int vj = this->sequence[j];
-      int vjNext = this->sequence[j + 1];
+  for (auto i = next(begin); i != stop; i++) {
+    int vi = *i;
+    int viPrev = *prev(i);
 
-      double delta = d->getDistance(viNext, vjNext) + d->getDistance(vj, vj) -
-                     d->getDistance(vi, viNext) - d->getDistance(vj, vjNext);
+    double distanceViPrevVi = d->getDistance(viPrev, vi);
+
+    for (auto j = next(i, 3); j != back; j++) {
+      int vj = *j;
+      int vjNext = *next(j);
+
+      double delta = d->getDistance(vi, vjNext) + d->getDistance(vj, viPrev) -
+                     d->getDistance(vj, vjNext) - distanceViPrevVi;
 
       if (delta < bestDelta) {
         bestDelta = delta;
@@ -230,44 +242,48 @@ bool Solution::bestImprovement2Opt() { // de lado por enquanto
       }
     }
   }
-  if (bestDelta < 0 && bestI != lastI && bestJ != lastJ) {
-    lastI = bestI;
-    lastJ = bestJ;
-    this->twoOptSwap(bestI, bestJ);
+  if (bestDelta < 0) {
+    this->performTwoOptSwap(bestI, bestJ);
     this->cost += bestDelta;
     return true;
   }
   return false;
 }
 
-void Solution::twoOptSwap(int i, int j) {
-  while (i < j) {
-    std::swap(this->sequence[i], this->sequence[j]);
-    i++;
-    j--;
-  }
+void Solution::performTwoOptSwap(vector<int>::iterator i,
+                                 vector<int>::iterator j) {
+  std::reverse(i, next(j));
 }
 
 bool Solution::bestImprovementOrOpt(int size) {
   if (size < 1 || size > 3)
     return false;
-  size--;
+  int distance = size - 1;
   double bestDelta = 0;
-  int bestI = 0, bestJ = 0;
+  vector<int>::iterator bestI, bestJ;
+  vector<int>::iterator begin = sequence.begin();
+  vector<int>::iterator back = prev(sequence.end());
+  vector<int>::iterator stop = prev(back, size);
 
-  for (int i = 1; i < sequence.size() - 2 - size; i++) {
-    int vi = sequence[i];
-    int viPrev = sequence[i - 1];
-    int vi2 = sequence[i + size];
-    int vi2Next = sequence[i + size + 1];
+  for (auto i = next(begin); i != stop; i++) {
+    int vi = *i;
+    int viPrev = *prev(i);
 
-    for (int j = i + size + 1; j < sequence.size() - 1; j++) {
-      int vj = sequence[j];
-      int vjNext = sequence[j + 1];
+    vector<int>::iterator i2 = next(i, distance);
+
+    int vi2 = *i2;
+    int vi2Next = *next(i2);
+
+    double costViPrevVi = d->getDistance(viPrev, vi);
+    double costVi2Vi2Next = d->getDistance(vi2, vi2Next);
+    double costViPrevVi2Next = d->getDistance(viPrev, vi2Next);
+
+    for (auto j = next(i, size); j != back; j++) {
+      int vj = *j;
+      int vjNext = *next(j);
 
       double delta = d->getDistance(vjNext, vi) + d->getDistance(vi2, vj) +
-                     d->getDistance(viPrev, vi2Next) -
-                     d->getDistance(viPrev, vi) - d->getDistance(vi2, vi2Next) -
+                     costViPrevVi2Next - costViPrevVi - costVi2Vi2Next -
                      d->getDistance(vj, vjNext);
 
       if (delta < bestDelta) {
@@ -279,7 +295,7 @@ bool Solution::bestImprovementOrOpt(int size) {
   }
 
   if (bestDelta < 0) {
-    this->orOpt(bestI, bestJ, size);
+    this->performOrOpt(bestI, bestJ, size);
     this->cost += bestDelta;
     return true;
   }
@@ -287,8 +303,11 @@ bool Solution::bestImprovementOrOpt(int size) {
   return false;
 }
 
-void Solution::orOpt(int i, int j, int size) {
-  for (int k = 0; k < size + 1; k++) {
+void Solution::performOrOpt(std::vector<int>::iterator _i,
+                            std::vector<int>::iterator _j, int size) {
+  int i = std::distance(sequence.begin(), _i);
+  int j = std::distance(sequence.begin(), _j);
+  for (int k = 0; k < size; k++) {
     int v = sequence[i];
     sequence.erase(sequence.begin() + i);
     sequence.insert(sequence.begin() + j, v);
