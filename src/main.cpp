@@ -48,12 +48,12 @@ int main(int argc, char **argv) {
   d->read();
   size_t n = d->getDimension();
 
-  // cout << "Dimension: " << n << endl;
-  // Solution *s = new Solution(true);
-  // cout << "Solucao s = ";
-  // s->show();
-  // s->calculateCost();
-  // cout << "Custo solucao = " << s->getCost() << endl;
+  srand(time(0));
+
+  int seeders[10] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+  int seed = seeders[rand() % 10];
+
+  srand(seed);
 
   int maxIterIls = n;
 
@@ -70,14 +70,6 @@ int main(int argc, char **argv) {
   Solution *s = ILS(50, maxIterIls);
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
-
-  // cout << "------------\n";
-  // s->calculateCost();
-  // cout << "Solucao s = ";
-  // s->show();
-  // cout << "Custo solucao = " << s->getCost() << endl;
-  // cout << "Tempo de execução = " << duration_.count() / 1000 << " seg" <<
-  // endl;
 
   cout << d->getInstanceName() << ';' << s->getCost() << ';'
        << duration_.count() / 1000 << endl;
