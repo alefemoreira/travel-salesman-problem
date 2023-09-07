@@ -54,21 +54,16 @@ Solution::Solution(bool build) {
   }
   sequence.push_back(1);
 
-  // initialize random generator; Uses Normal Distribution
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::normal_distribution<> dis(0.5, 0.1);
-
   while (!v.empty()) {
     std::vector<InsertionCost> *costs = calculateInsertionCosts(&sequence, &v);
     std::sort(costs->begin(), costs->end(),
               [](InsertionCost a, InsertionCost b) { return a.cost < b.cost; });
 
     // dis(gen) generates random number following normal distribuission
-    double alpha = dis(gen);
+    double alpha = (double)rand() / RAND_MAX;
 
-    int selected_index = rand() % ((int)ceil(alpha * costs->size()));
-    InsertionCost selected = (*costs)[selected_index];
+    int selectedIndex = rand() % ((int)ceil(alpha * costs->size()));
+    InsertionCost selected = (*costs)[selectedIndex];
 
     sequence.insert(sequence.begin() + selected.edge + 1, selected.node);
     v.erase(selected.it);
@@ -105,15 +100,15 @@ void Solution::show() {
 }
 
 void Solution::localSearch() {
+  // bool improved = false;
+  // do {
+  //   improved = bestImprovementOrOpt(2);
+  // } while (improved);
   std::vector<int> NL = {1, 2, 3, 4, 5};
   bool improved = false;
 
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis;
-
   while (!NL.empty()) {
-    int n = dis(gen) % NL.size();
+    int n = rand() % NL.size();
     switch (NL[n]) {
     case 1:
       improved = this->bestImprovementSwap();
@@ -146,13 +141,16 @@ Solution *Solution::disturbance(Solution *s) {
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(2, ceil((float)dimension / 10));
 
-  int sizeI = dis(gen);
-  int sizeJ = dis(gen);
+  int lowerBound = 2;
+  int upperBound = std::ceil(static_cast<double>(dimension) / 10);
 
-  dis = std::uniform_int_distribution<>(1, dimension / 2 - sizeI);
-  int i = dis(gen);
-  dis = std::uniform_int_distribution<>(dimension / 2, dimension - sizeJ);
-  int j = dis(gen);
+  int sizeI = rand() % (upperBound - lowerBound + 1) + lowerBound;
+  int sizeJ = rand() % (upperBound - lowerBound + 1) + lowerBound;
+
+  // [1, dimension / 2 - sizeI]
+  int i = rand() % (dimension / 2 - sizeI - 1) + 1;
+  // // [dimension / 2 + 1, seq.size - 1]
+  int j = dimension / 2 + rand() % (dimension / 2 - sizeJ - 1) + 1;
 
   std::vector<int> *seq = solution->getSequence();
   auto seqBegin = seq->begin();
@@ -214,14 +212,14 @@ bool Solution::bestImprovement2Opt() { // de lado por enquanto
 
   for (int i = 1; i < this->sequence.size() - 2; i++) {
     int vi = this->sequence[i];
-    int viNext = this->sequence[i + 1];
-    // + 2, because cannot be adjacents
+    int viPrev = this->sequence[i - 1];
+
     for (int j = i + 2; j < this->sequence.size() - 1; j++) {
       int vj = this->sequence[j];
       int vjNext = this->sequence[j + 1];
-
-      double delta = d->getDistance(viNext, vjNext) + d->getDistance(vj, vj) -
-                     d->getDistance(vi, viNext) - d->getDistance(vj, vjNext);
+      double distanceViPrevVi = d->getDistance(viPrev, vi);
+      double delta = d->getDistance(vi, vjNext) + d->getDistance(vj, viPrev) -
+                     d->getDistance(vj, vjNext) - distanceViPrevVi;
 
       if (delta < bestDelta) {
         bestDelta = delta;
