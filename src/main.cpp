@@ -46,7 +46,7 @@ Solution *ILS(int maxIter, int maxIterIls) {
 int main(int argc, char **argv) {
   srand(time(0));
 
-  int seeders[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  int seeders[10] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
   int seed = seeders[rand() % 10];
 
   srand(seed);
