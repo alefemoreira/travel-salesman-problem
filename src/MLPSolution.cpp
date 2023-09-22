@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 #include <numeric>
+#include <ostream>
 #include <random>
 #include <vector>
 
@@ -174,9 +175,31 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s) {
   int sizeJ = rand() % (upperBound - lowerBound + 1) + lowerBound;
 
   // [1, dimension / 2 - sizeI]
-  int i = rand() % (dimension / 2 - sizeI - 1) + 1;
+  lowerBound = 1;
+  upperBound = dimension - sizeI;
+  int i = rand() % (upperBound - lowerBound + 1) + lowerBound;
   // // [dimension / 2 + 1, seq.size - 1]
-  int j = dimension / 2 + rand() % (dimension / 2 - sizeJ - 1) + 1;
+
+  lowerBound = i + sizeI + 1;
+  upperBound = dimension - sizeJ;
+  int j1 = 0;
+  if (upperBound - lowerBound + 1 > 0)
+    j1 = rand() % (upperBound - lowerBound + 1) + lowerBound;
+
+  lowerBound = 1;
+  upperBound = i - sizeJ - 1;
+  int j2 = 0;
+  if (upperBound - lowerBound + 1 > 0)
+    j2 = rand() % (upperBound - lowerBound + 1) + lowerBound;
+
+  std::vector<int> possibleJ = {j1, j2};
+
+  int index = rand() % possibleJ.size();
+  while (possibleJ[index] < 1 || possibleJ[index] + sizeJ > dimension) {
+    possibleJ.erase(possibleJ.begin() + index);
+    index = rand() % possibleJ.size();
+  }
+  int j = possibleJ[index];
 
   std::list<int> *seq = solution->getSequence();
   auto seqBegin = seq->begin();
@@ -187,8 +210,8 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s) {
   list<int>::iterator startJ = next(seqBegin, j);
   list<int>::iterator endJ = next(startJ, sizeJ);
 
-  seq->splice(endJ, *seq, startI, endJ);
-  seq->splice(endI, *seq, startJ, endJ);
+  seq->splice(endJ, *seq, startI, endI);
+  seq->splice(endI, *seq, startJ, startI);
 
   solution->calculateCost();
   solution->updateAllSubsequences();
@@ -355,6 +378,9 @@ bool MLPSolution::bestImprovementOrOpt(int size) {
   if (size < 1 || size > 3)
     return false;
   int distance = size - 1;
+  int desloc = 0;
+  if (size == 1)
+    desloc++; // evita repetir o msm que o swap faz
   int end = this->sequence.size() - 1;
 
   double bestCost = this->cost;
@@ -368,8 +394,8 @@ bool MLPSolution::bestImprovementOrOpt(int size) {
   int i = 1;
   for (auto it = next(begin); it != stop; it++) {
 
-    int j = i + size;
-    for (auto jt = next(it, size); jt != back; jt++) {
+    int j = i + size + desloc;
+    for (auto jt = next(it, size + desloc); jt != back; jt++) {
 
       // [0, i-1][i+size, j][i + size - 1, i][j+1, end]
       Subsequence sigma1 = Subsequence::concatenate(subsequences[0][i - 1],
