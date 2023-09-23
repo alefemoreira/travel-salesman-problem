@@ -174,11 +174,9 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s) {
   int sizeI = rand() % (upperBound - lowerBound + 1) + lowerBound;
   int sizeJ = rand() % (upperBound - lowerBound + 1) + lowerBound;
 
-  // [1, dimension / 2 - sizeI]
   lowerBound = 1;
   upperBound = dimension - sizeI;
   int i = rand() % (upperBound - lowerBound + 1) + lowerBound;
-  // // [dimension / 2 + 1, seq.size - 1]
 
   lowerBound = i + sizeI + 1;
   upperBound = dimension - sizeJ;
@@ -192,14 +190,20 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s) {
   if (upperBound - lowerBound + 1 > 0)
     j2 = rand() % (upperBound - lowerBound + 1) + lowerBound;
 
-  std::vector<int> possibleJ = {j1, j2};
+  int j;
 
-  int index = rand() % possibleJ.size();
-  while (possibleJ[index] < 1 || possibleJ[index] + sizeJ > dimension) {
-    possibleJ.erase(possibleJ.begin() + index);
-    index = rand() % possibleJ.size();
+  if (rand() % 2 == 0) {
+    if (j1 >= 1 && j1 + sizeJ <= dimension)
+      j = j1;
+    else
+      j = j2;
+
+  } else {
+    if (j2 >= 1 && j2 + sizeJ <= dimension)
+      j = j2;
+    else
+      j = j1;
   }
-  int j = possibleJ[index];
 
   std::list<int> *seq = solution->getSequence();
   auto seqBegin = seq->begin();
