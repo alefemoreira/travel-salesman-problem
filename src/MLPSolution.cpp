@@ -33,9 +33,9 @@ bool validateCost(MLPSolution *s) {
 }
 
 const std::vector<double> MLPSolution::alphas = {
-    0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08,
-    0.09, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17,
-    0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25};
+    0,    00,   0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07,
+    0.08, 0.09, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16,
+    0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25};
 
 MLPSolution *MLPSolution::build(double alpha) {
   MLPSolution *mlp = new MLPSolution();
@@ -52,7 +52,7 @@ MLPSolution *MLPSolution::build(double alpha) {
 
   while (cl.size() != 0) {
     std::sort(cl.begin(), cl.end(), [v](int a, int b) {
-      return Data::instance->getDistance(v, a) >
+      return Data::instance->getDistance(v, a) <
              Data::instance->getDistance(v, b);
     });
     int rclSize = (int)ceil(alpha * cl.size());
@@ -144,16 +144,16 @@ void MLPSolution::localSearch() {
       improved = this->bestImprovementSwap();
       break;
     case 2:
-      improved = this->bestImprovementOrOpt(1);
+      improved = this->bestImprovement2Opt();
       break;
     case 3:
-      improved = this->bestImprovementOrOpt(2);
+      improved = this->bestImprovementOrOpt(1);
       break;
     case 4:
-      improved = this->bestImprovementOrOpt(3);
+      improved = this->bestImprovementOrOpt(2);
       break;
     case 5:
-      improved = this->bestImprovement2Opt();
+      improved = this->bestImprovementOrOpt(3);
       break;
     }
     if (improved) {
@@ -383,8 +383,8 @@ bool MLPSolution::bestImprovementOrOpt(int size) {
     return false;
   int distance = size - 1;
   int desloc = 0;
-  if (size == 1)
-    desloc++; // evita repetir o msm que o swap faz
+  // if (size == 1)
+  // desloc++; // evita repetir o msm que o swap faz
   int end = this->sequence.size() - 1;
 
   double bestCost = this->cost;
@@ -398,8 +398,8 @@ bool MLPSolution::bestImprovementOrOpt(int size) {
   int i = 1;
   for (auto it = next(begin); it != stop; it++) {
 
-    int j = i + size + desloc;
-    for (auto jt = next(it, size + desloc); jt != back; jt++) {
+    int j = i + size;
+    for (auto jt = next(it, size); jt != back; jt++) {
 
       // [0, i-1][i+size, j][i + size - 1, i][j+1, end]
       Subsequence sigma1 = Subsequence::concatenate(subsequences[0][i - 1],

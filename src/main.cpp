@@ -57,7 +57,7 @@ MLPSolution *ILS_MLP(int maxIter, int maxIterIls) {
     best = s;
 
     int iterIls = 0;
-    while (iterIls <= maxIterIls) {
+    while (iterIls < maxIterIls) {
       s->localSearch();
       if (s->getCost() < best->getCost()) {
         best = s;
@@ -138,7 +138,8 @@ void mlp(int n) {
 
 int main(int argc, char **argv) {
   cout << fixed << std::setprecision(2);
-  srand(time(0));
+  int seed = atoi(argv[2]);
+  srand(seed);
 
   Data::create(argc, argv[1]);
   Data *d = Data::getInstance();
@@ -146,7 +147,7 @@ int main(int argc, char **argv) {
 
   size_t n = d->getDimension();
 
-  int problem = atoi(argv[2]);
+  int problem = atoi(argv[3]);
 
   switch (problem) {
   case 1:

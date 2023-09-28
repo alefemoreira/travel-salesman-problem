@@ -166,8 +166,8 @@ TSPSolution *TSPSolution::disturbance(TSPSolution *s) {
   list<int>::iterator startJ = next(seqBegin, j);
   list<int>::iterator endJ = next(startJ, sizeJ);
 
-  seq->splice(endJ, *seq, startI, endJ);
-  seq->splice(endI, *seq, startJ, endJ);
+  seq->splice(endJ, *seq, startI, endI);
+  seq->splice(endI, *seq, startJ, startI);
 
   solution->calculateCost();
 
