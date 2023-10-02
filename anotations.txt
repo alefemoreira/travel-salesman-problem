@@ -1,0 +1,2 @@
+- Usar o double bridge meio a meio é pior pro desempenho, mas melhor pro custo.
+- Remover a inversão do bloco no orOpt melhorou o custo e o tempo. Eu estava fzd errado desde sempre?

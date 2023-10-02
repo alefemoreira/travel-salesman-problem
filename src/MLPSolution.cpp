@@ -308,9 +308,12 @@ bool MLPSolution::bestImprovementSwap() {
     for (auto jt = nextI; jt != back; jt++) {
       Subsequence sigma =
           Subsequence::concatenate(subsequences[0][i - 1], subsequences[j][j]);
-      if (j != i + 1) { // caso da adjacencia;
+      bool isAdjacent = j != i + 1;
+
+      if (isAdjacent) { // caso da adjacencia;
         sigma = Subsequence::concatenate(sigma, subsequences[i + 1][j - 1]);
       }
+
       sigma = Subsequence::concatenate(sigma, subsequences[i][i]);
       sigma = Subsequence::concatenate(sigma, subsequences[j + 1][end]);
 
@@ -336,7 +339,7 @@ bool MLPSolution::bestImprovementSwap() {
   return false;
 }
 
-bool MLPSolution::bestImprovement2Opt() { // de lado por enquanto
+bool MLPSolution::bestImprovement2Opt() {
   int bestDelta = 0;
   int end = this->sequence.size() - 1;
   double bestCost = this->cost;
@@ -345,12 +348,12 @@ bool MLPSolution::bestImprovement2Opt() { // de lado por enquanto
   list<int>::iterator bestI, bestJ;
   list<int>::iterator begin = sequence.begin();
   list<int>::iterator back = prev(sequence.end());
-  list<int>::iterator stop = prev(back, 3);
+  list<int>::iterator stop = prev(back, 2);
 
   int i = 1;
   for (auto it = next(begin); it != stop; it++) {
-    int j = i + 3;
-    for (auto jt = next(it, 3); jt != back; jt++) {
+    int j = i + 2;
+    for (auto jt = next(it, 2); jt != back; jt++) {
       Subsequence sigma1 =
           Subsequence::concatenate(subsequences[0][i - 1], subsequences[j][i]);
       Subsequence sigma2 =

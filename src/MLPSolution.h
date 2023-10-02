@@ -61,9 +61,9 @@ private:
   void performOrOpt(std::list<int>::iterator i, std::list<int>::iterator j,
                     int size) {
     sequence.splice(next(j), sequence, i, next(i, size));
-    if (size >= 2) {
-      iter_swap(next(j), next(j, size));
-    }
+    // if (size >= 2) {
+    //   iter_swap(next(j), next(j, size));
+    // }
   }
 };
 
