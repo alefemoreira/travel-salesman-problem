@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 #include <numeric>
+#include <ostream>
 #include <random>
 #include <vector>
 
@@ -32,9 +33,9 @@ bool validateCost(MLPSolution *s) {
 }
 
 const std::vector<double> MLPSolution::alphas = {
-    0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08,
-    0.09, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17,
-    0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25};
+    0,    00,   0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07,
+    0.08, 0.09, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16,
+    0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25};
 
 MLPSolution *MLPSolution::build(double alpha) {
   MLPSolution *mlp = new MLPSolution();
@@ -51,7 +52,7 @@ MLPSolution *MLPSolution::build(double alpha) {
 
   while (cl.size() != 0) {
     std::sort(cl.begin(), cl.end(), [v](int a, int b) {
-      return Data::instance->getDistance(v, a) >
+      return Data::instance->getDistance(v, a) <
              Data::instance->getDistance(v, b);
     });
     int rclSize = (int)ceil(alpha * cl.size());
@@ -143,16 +144,16 @@ void MLPSolution::localSearch() {
       improved = this->bestImprovementSwap();
       break;
     case 2:
-      improved = this->bestImprovementOrOpt(1);
+      improved = this->bestImprovement2Opt();
       break;
     case 3:
-      improved = this->bestImprovementOrOpt(2);
+      improved = this->bestImprovementOrOpt(1);
       break;
     case 4:
-      improved = this->bestImprovementOrOpt(3);
+      improved = this->bestImprovementOrOpt(2);
       break;
     case 5:
-      improved = this->bestImprovement2Opt();
+      improved = this->bestImprovementOrOpt(3);
       break;
     }
     if (improved) {
@@ -173,10 +174,36 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s) {
   int sizeI = rand() % (upperBound - lowerBound + 1) + lowerBound;
   int sizeJ = rand() % (upperBound - lowerBound + 1) + lowerBound;
 
-  // [1, dimension / 2 - sizeI]
-  int i = rand() % (dimension / 2 - sizeI - 1) + 1;
-  // // [dimension / 2 + 1, seq.size - 1]
-  int j = dimension / 2 + rand() % (dimension / 2 - sizeJ - 1) + 1;
+  lowerBound = 1;
+  upperBound = dimension - sizeI;
+  int i = rand() % (upperBound - lowerBound + 1) + lowerBound;
+
+  lowerBound = i + sizeI + 1;
+  upperBound = dimension - sizeJ;
+  int j1 = 0;
+  if (upperBound - lowerBound + 1 > 0)
+    j1 = rand() % (upperBound - lowerBound + 1) + lowerBound;
+
+  lowerBound = 1;
+  upperBound = i - sizeJ - 1;
+  int j2 = 0;
+  if (upperBound - lowerBound + 1 > 0)
+    j2 = rand() % (upperBound - lowerBound + 1) + lowerBound;
+
+  int j;
+
+  if (rand() % 2 == 0) {
+    if (j1 >= 1 && j1 + sizeJ <= dimension)
+      j = j1;
+    else
+      j = j2;
+
+  } else {
+    if (j2 >= 1 && j2 + sizeJ <= dimension)
+      j = j2;
+    else
+      j = j1;
+  }
 
   std::list<int> *seq = solution->getSequence();
   auto seqBegin = seq->begin();
@@ -187,8 +214,8 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s) {
   list<int>::iterator startJ = next(seqBegin, j);
   list<int>::iterator endJ = next(startJ, sizeJ);
 
-  seq->splice(endJ, *seq, startI, endJ);
-  seq->splice(endI, *seq, startJ, endJ);
+  seq->splice(endJ, *seq, startI, endI);
+  seq->splice(endI, *seq, startJ, startI);
 
   solution->calculateCost();
   solution->updateAllSubsequences();
@@ -281,9 +308,12 @@ bool MLPSolution::bestImprovementSwap() {
     for (auto jt = nextI; jt != back; jt++) {
       Subsequence sigma =
           Subsequence::concatenate(subsequences[0][i - 1], subsequences[j][j]);
-      if (j != i + 1) { // caso da adjacencia;
+      bool isAdjacent = j != i + 1;
+
+      if (isAdjacent) { // caso da adjacencia;
         sigma = Subsequence::concatenate(sigma, subsequences[i + 1][j - 1]);
       }
+
       sigma = Subsequence::concatenate(sigma, subsequences[i][i]);
       sigma = Subsequence::concatenate(sigma, subsequences[j + 1][end]);
 
@@ -309,7 +339,7 @@ bool MLPSolution::bestImprovementSwap() {
   return false;
 }
 
-bool MLPSolution::bestImprovement2Opt() { // de lado por enquanto
+bool MLPSolution::bestImprovement2Opt() {
   int bestDelta = 0;
   int end = this->sequence.size() - 1;
   double bestCost = this->cost;
@@ -318,12 +348,12 @@ bool MLPSolution::bestImprovement2Opt() { // de lado por enquanto
   list<int>::iterator bestI, bestJ;
   list<int>::iterator begin = sequence.begin();
   list<int>::iterator back = prev(sequence.end());
-  list<int>::iterator stop = prev(back, 3);
+  list<int>::iterator stop = prev(back, 2);
 
   int i = 1;
   for (auto it = next(begin); it != stop; it++) {
-    int j = i + 3;
-    for (auto jt = next(it, 3); jt != back; jt++) {
+    int j = i + 2;
+    for (auto jt = next(it, 2); jt != back; jt++) {
       Subsequence sigma1 =
           Subsequence::concatenate(subsequences[0][i - 1], subsequences[j][i]);
       Subsequence sigma2 =
@@ -355,6 +385,9 @@ bool MLPSolution::bestImprovementOrOpt(int size) {
   if (size < 1 || size > 3)
     return false;
   int distance = size - 1;
+  int desloc = 0;
+  // if (size == 1)
+  // desloc++; // evita repetir o msm que o swap faz
   int end = this->sequence.size() - 1;
 
   double bestCost = this->cost;
