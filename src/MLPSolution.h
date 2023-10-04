@@ -15,7 +15,7 @@ public:
     this->subsequences = std::vector<std::vector<Subsequence>>(
         n + 1, std::vector<Subsequence>(n + 1));
   }
-  MLPSolution(bool build);     // equivalente ao método construção
+  // MLPSolution(bool build);     // equivalente ao método construção
   MLPSolution(MLPSolution *s); // Copia uma solução já existente
   static const std::vector<double> alphas;
 
@@ -34,7 +34,7 @@ public:
   bool isHamiltonTour();
 
   static MLPSolution *disturbance(MLPSolution *s);
-  static MLPSolution *build(double alpha);
+  void build(double alpha);
   static double randomAlpha() {
     int index = rand() % MLPSolution::alphas.size();
     return MLPSolution::alphas[index];

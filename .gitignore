@@ -4,3 +4,5 @@
 *.csv
 tsp
 executions*/
+.DS_store
+.vscode

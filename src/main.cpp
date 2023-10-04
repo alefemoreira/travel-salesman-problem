@@ -11,81 +11,104 @@
 
 using namespace std;
 
-TSPSolution *ILS_TSP(int maxIter, int maxIterIls) {
+TSPSolution *ILS_TSP(int maxIter, int maxIterIls)
+{
   TSPSolution *bestOfAll = new TSPSolution();
   TSPSolution *best, *s;
   bestOfAll->setCost(INFINITY);
 
-  for (int i = 0; i < maxIter; i++) {
+  for (int i = 0; i < maxIter; i++)
+  {
     s = new TSPSolution(true); // new TSPSolution(true') is equivalent to
     best = s;
 
     int iterIls = 0;
-    while (iterIls <= maxIterIls) {
+    while (iterIls <= maxIterIls)
+    {
       s->localSearch();
-      if (s->getCost() < best->getCost()) {
+      if (s->getCost() < best->getCost())
+      {
         best = s;
         iterIls = 0;
-      } else if (s != best) {
+      }
+      else if (s != best)
+      {
         delete s;
       }
       s = TSPSolution::disturbance(best);
       iterIls++;
     }
 
-    if (s != best) {
+    if (s != best)
+    {
       delete s;
     }
 
-    if (best->getCost() < bestOfAll->getCost()) {
+    if (best->getCost() < bestOfAll->getCost())
+    {
       bestOfAll = best;
-    } else {
+    }
+    else
+    {
       delete best;
     }
   }
   return bestOfAll;
 }
 
-MLPSolution *ILS_MLP(int maxIter, int maxIterIls) {
+MLPSolution *ILS_MLP(int maxIter, int maxIterIls)
+{
   MLPSolution *bestOfAll = new MLPSolution();
   MLPSolution *best, *s;
   bestOfAll->setCost(INFINITY);
 
-  for (int i = 0; i < maxIter; i++) {
+  for (int i = 0; i < maxIter; i++)
+  {
     double alpha = MLPSolution::randomAlpha();
-    s = MLPSolution::build(alpha);
+    s = new MLPSolution();
+    s->build(alpha);
     best = s;
 
     int iterIls = 0;
-    while (iterIls < maxIterIls) {
+    while (iterIls < maxIterIls)
+    {
       s->localSearch();
-      if (s->getCost() < best->getCost()) {
+      if (s->getCost() < best->getCost())
+      {
         best = s;
         iterIls = 0;
-      } else if (s != best) {
+      }
+      else if (s != best)
+      {
         delete s;
       }
       s = MLPSolution::disturbance(best);
       iterIls++;
     }
 
-    if (s != best) {
+    if (s != best)
+    {
       delete s;
     }
 
-    if (best->getCost() < bestOfAll->getCost()) {
+    if (best->getCost() < bestOfAll->getCost())
+    {
       bestOfAll = best;
-    } else {
+    }
+    else
+    {
       delete best;
     }
   }
   return bestOfAll;
 }
 
-void tsp(int n) {
+void tsp(int n)
+{
   int maxIterIls = n;
 
-  if (n > 150) {
+  if (n > 150)
+  {
     maxIterIls /= 2;
   }
 
@@ -111,10 +134,12 @@ void tsp(int n) {
        << duration_.count() / 1000 << endl;
 }
 
-void mlp(int n) {
+void mlp(int n)
+{
   int maxIterIls = 100;
 
-  if (n < 100) {
+  if (n < 100)
+  {
     maxIterIls = n;
   }
 
@@ -136,11 +161,12 @@ void mlp(int n) {
   // cout << "Tempo  : " << duration_.count() / 1000 << " segundos" << endl;
 }
 
-void tspBnB(int n) {
-  
+void tspBnB(int n)
+{
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   cout << fixed << std::setprecision(2);
   int seed = atoi(argv[2]);
   srand(seed);
@@ -153,7 +179,8 @@ int main(int argc, char **argv) {
 
   int problem = atoi(argv[3]);
 
-  switch (problem) {
+  switch (problem)
+  {
   case 1:
     tsp(n);
     break;
