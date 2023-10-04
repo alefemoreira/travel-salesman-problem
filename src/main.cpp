@@ -136,6 +136,10 @@ void mlp(int n) {
   // cout << "Tempo  : " << duration_.count() / 1000 << " segundos" << endl;
 }
 
+void tspBnB(int n) {
+  
+}
+
 int main(int argc, char **argv) {
   cout << fixed << std::setprecision(2);
   srand(time(0));

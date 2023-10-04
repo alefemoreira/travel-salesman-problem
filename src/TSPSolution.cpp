@@ -45,8 +45,6 @@ TSPSolution::TSPSolution(bool build) {
   }
   sequence.push_back(1);
 
-  // initialize random generator; Uses Normal Distribution
-
   while (!v.empty()) {
     std::vector<InsertionCost> *costs = calculateInsertionCosts(&sequence, &v);
     std::sort(costs->begin(), costs->end(),
