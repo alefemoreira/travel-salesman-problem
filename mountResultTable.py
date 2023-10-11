@@ -4,7 +4,7 @@ import numpy as np
 
 
 def get_min_cost_execution(csv_file):
-    data = np.genfromtxt('mlp-executions/' + csv_file,
+    data = np.genfromtxt('executions-time0/' + csv_file,
                          delimiter=';', dtype=None, names=True, encoding=None)
     cost_index = 1  # Index of the 'custo' column
     time_index = 2  # Index of the 'tempo' column
@@ -44,15 +44,15 @@ def save_to_csv(output_file, data):
 
 if __name__ == '__main__':
     # List of CSV files to read
-    csv_files = ["eil51.csv", "berlin52.csv", "brazil58.csv", "st70.csv", "eil76.csv", "pr76.csv", "gr96.csv", "rat99.csv", "kroB100.csv", "kroC100.csv", "kroD100.csv", "kroE100.csv", "rd100.csv", "kroA100.csv", "eil101.csv", "lin105.csv", "pr107.csv", "gr120.csv", "pr124.csv", "bier127.csv", "ch130.csv", "pr136.csv", "gr137.csv", "pr144.csv",
-                 "kroA150.csv", "kroB150.csv", "ch150.csv", "pr152.csv", "u159.csv", "si175.csv", "brg180.csv", "rat195.csv", "d198.csv", "kroA200.csv", "kroB200.csv", "gr202.csv", "ts225.csv", "tsp225.csv", "pr226.csv", "gr229.csv", "gil262.csv", "pr264.csv", "a280.csv", "pr299.csv", "lin318.csv", "linhp318.csv", "rd400.csv"]  # Add your file names here
+    # csv_files = ["eil51.csv", "berlin52.csv", "brazil58.csv", "st70.csv", "eil76.csv", "pr76.csv", "gr96.csv", "rat99.csv", "kroB100.csv", "kroC100.csv", "kroD100.csv", "kroE100.csv", "rd100.csv", "kroA100.csv", "eil101.csv", "lin105.csv", "pr107.csv", "gr120.csv", "pr124.csv", "bier127.csv", "ch130.csv", "pr136.csv", "gr137.csv", "pr144.csv",
+                #  "kroA150.csv", "kroB150.csv", "ch150.csv", "pr152.csv", "u159.csv", "si175.csv", "brg180.csv", "rat195.csv", "d198.csv", "kroA200.csv", "kroB200.csv", "gr202.csv", "ts225.csv", "tsp225.csv", "pr226.csv", "gr229.csv", "gil262.csv", "pr264.csv", "a280.csv", "pr299.csv", "lin318.csv", "linhp318.csv", "rd400.csv"]  # Add your file names here
     # csv_files = ["dantzig42.csv", "swiss42.csv", "att48.csv", "gr48.csv", "hk48.csv", "eil51.csv", "berlin52.csv", "brazil58.csv", "st70.csv", "eil76.csv", "pr76.csv", "gr96.csv", "rat99.csv", "kroA100.csv", "kroB100.csv", "kroC100.csv", "kroD100.csv", "kroE100.csv", "rd100.csv", "eil101.csv", "lin105.csv", "pr107.csv"]
-
+    csv_files = ["dantzig42.csv", "swiss42.csv", "att48.csv", "gr48.csv", "hk48.csv", "eil51.csv", "berlin52.csv", "brazil58.csv", "st70.csv", "eil76.csv", "pr76.csv", "pr76r.csv", "gr96.csv", "rat99.csv", "kroA100.csv", "kroB100.csv", "kroC100.csv", "kroD100.csv", "kroE100.csv", "rd100.csv", "eil101.csv", "lin105.csv", "pr107"]
     # Get min cost and execution time from each file
     min_values_data = read_csv_files_and_get_min_values(csv_files)
 
     # Save the data to a new CSV file
-    output_csv_file = 'mlp_result.csv'
+    output_csv_file = 'mlp_result_time0_m1.csv'
     save_to_csv(output_csv_file, min_values_data)
 
     print(

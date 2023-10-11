@@ -11,18 +11,15 @@
 #include <random>
 #include <vector>
 
-bool validateCost(MLPSolution *s)
-{
+bool validateCost(MLPSolution *s) {
   double cost = s->getCost();
   s->calculateCost();
   double recalculatedCost = s->getCost();
-  if (recalculatedCost != cost)
-  {
+  if (recalculatedCost != cost) {
     cout << '1' << endl;
     return false;
   }
-  if (!s->isHamiltonTour())
-  {
+  if (!s->isHamiltonTour()) {
     cout << '2' << endl;
     return false;
   }
@@ -36,12 +33,11 @@ bool validateCost(MLPSolution *s)
 }
 
 const std::vector<double> MLPSolution::alphas = {
-    0, 00, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07,
+    0,    00,   0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07,
     0.08, 0.09, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16,
     0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25};
 
-void MLPSolution::build(double alpha)
-{
+void MLPSolution::build(double alpha) {
   int n = Data::instance->getDimension();
 
   this->sequence.push_back(1);
@@ -53,11 +49,11 @@ void MLPSolution::build(double alpha)
   double acc = 0;
   this->cost = 0;
 
-  while (cl.size() != 0)
-  {
-    std::sort(cl.begin(), cl.end(), [v](int a, int b)
-              { return Data::instance->getDistance(v, a) <
-                       Data::instance->getDistance(v, b); });
+  while (cl.size() != 0) {
+    std::sort(cl.begin(), cl.end(), [v](int a, int b) {
+      return Data::instance->getDistance(v, a) <
+             Data::instance->getDistance(v, b);
+    });
     int rclSize = (int)ceil(alpha * cl.size());
     int selectedIndex = rclSize == 0 ? 0 : rand() % rclSize;
     int c = cl[selectedIndex];
@@ -76,16 +72,14 @@ void MLPSolution::build(double alpha)
   this->updateAllSubsequences();
 }
 
-MLPSolution::MLPSolution(MLPSolution *s)
-{
+MLPSolution::MLPSolution(MLPSolution *s) {
   this->sequence = std::list<int>(*s->getSequence());
   this->subsequences =
       std::vector<std::vector<Subsequence>>(*s->getSubsequences());
   this->cost = s->cost;
 }
 
-bool MLPSolution::isHamiltonTour()
-{
+bool MLPSolution::isHamiltonTour() {
   int size = this->sequence.size();
   list<int>::iterator begin = sequence.begin();
   list<int>::iterator pback = prev(sequence.end());
@@ -95,8 +89,7 @@ bool MLPSolution::isHamiltonTour()
 
   vector<int> bucket(size, 0);
 
-  for (auto it = begin; it != pback; it++)
-  {
+  for (auto it = begin; it != pback; it++) {
     bucket[*it]++;
     if (bucket[*it] > 1)
       return false;
@@ -108,32 +101,27 @@ bool MLPSolution::isHamiltonTour()
 double MLPSolution::getCost() { return this->cost; }
 void MLPSolution::setCost(double c) { this->cost = c; }
 void MLPSolution::setSequence(std::list<int> *v) { this->sequence = *v; }
-void MLPSolution::setSubsequences(std::vector<std::vector<Subsequence>> *ss)
-{
+void MLPSolution::setSubsequences(std::vector<std::vector<Subsequence>> *ss) {
   this->subsequences = *ss;
 }
-std::vector<std::vector<Subsequence>> *MLPSolution::getSubsequences()
-{
+std::vector<std::vector<Subsequence>> *MLPSolution::getSubsequences() {
   return &this->subsequences;
 }
 std::list<int> *MLPSolution::getSequence() { return &this->sequence; }
 
-void MLPSolution::calculateCost()
-{
+void MLPSolution::calculateCost() {
   this->cost = 0;
-  auto begin = sequence.begin();
+  double acc = 0;
 
-  for (auto it = begin; it != sequence.end(); it++)
-  {
-    list<int>::iterator a = begin;
-    list<int>::iterator b = next(a);
-    for (; a != it; a++, b++)
-      this->cost += Data::instance->getDistance(*a, *b);
+  list<int>::iterator a = sequence.begin();
+  list<int>::iterator b = next(a);
+  for (; b != sequence.end(); a++, b++) {
+    acc += Data::instance->getDistance(*a, *b);
+    this->cost += acc;
   }
 }
 
-void MLPSolution::show()
-{
+void MLPSolution::show() {
   list<int>::iterator back = prev(sequence.end());
   for (auto it = sequence.begin(); it != back; it++)
     std::cout << *it << " -> ";
@@ -141,22 +129,18 @@ void MLPSolution::show()
   std::cout << this->sequence.back() << std::endl;
 }
 
-void MLPSolution::localSearch()
-{
+void MLPSolution::localSearch() {
   // bool improved = false;
-  // do
-  // {
-  //   improved = this->bestImprovement2Opt();
+  // do {
+  //   improved = this->bestImprovementOrOpt(2);
   //   validateCost(this);
   // } while (improved);
   std::vector<int> NL = {1, 2, 3, 4, 5};
   bool improved = false;
 
-  while (!NL.empty())
-  {
+  while (!NL.empty()) {
     int n = rand() % NL.size();
-    switch (NL[n])
-    {
+    switch (NL[n]) {
     case 1:
       improved = this->bestImprovementSwap();
       break;
@@ -173,19 +157,17 @@ void MLPSolution::localSearch()
       improved = this->bestImprovementOrOpt(3);
       break;
     }
-    if (improved)
-    {
+    if (improved) {
       NL = {1, 2, 3, 4, 5};
-    }
-    else
-    {
-      NL.erase(NL.begin() + n);
+    } else {
+      swap(NL[n], NL[NL.size() - 1]);
+      NL.pop_back();
+      // NL.erase(NL.begin() + n);
     }
   };
 }
 
-MLPSolution *MLPSolution::disturbance(MLPSolution *s)
-{
+MLPSolution *MLPSolution::disturbance(MLPSolution *s) {
   MLPSolution *solution = new MLPSolution(s); // copia a solução
   int dimension = s->sequence.size() - 1;
 
@@ -213,15 +195,12 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s)
 
   int j;
 
-  if (rand() % 2 == 0)
-  {
+  if (rand() % 2 == 0) {
     if (j1 >= 1 && j1 + sizeJ <= dimension)
       j = j1;
     else
       j = j2;
-  }
-  else
-  {
+  } else {
     if (j2 >= 1 && j2 + sizeJ <= dimension)
       j = j2;
     else
@@ -247,14 +226,12 @@ MLPSolution *MLPSolution::disturbance(MLPSolution *s)
 }
 
 void MLPSolution::updateSubsequences(int _i, list<int>::iterator _it, int _j,
-                                     list<int>::iterator _jt)
-{
+                                     list<int>::iterator _jt) {
   list<int>::iterator begin = this->sequence.begin();
   list<int>::iterator back = prev(this->sequence.end());
 
   int i = _i;
-  for (auto it = _it; it != next(_jt); it++)
-  {
+  for (auto it = _it; it != next(_jt); it++) {
     this->subsequences[i][i].W = (i > 0);
     this->subsequences[i][i].C = 0;
     this->subsequences[i][i].T = 0;
@@ -266,8 +243,7 @@ void MLPSolution::updateSubsequences(int _i, list<int>::iterator _it, int _j,
 
   int n = this->sequence.size();
 
-  for (int i = 0; i <= _j; i++)
-  {
+  for (int i = 0; i <= _j; i++) {
     int j = _i;
     if (i >= _i)
       j = i + 1;
@@ -276,8 +252,7 @@ void MLPSolution::updateSubsequences(int _i, list<int>::iterator _it, int _j,
           this->subsequences[i][j - 1], this->subsequences[j][j]);
   }
 
-  for (int i = n - 1; i >= _i; i--)
-  {
+  for (int i = n - 1; i >= _i; i--) {
     int j = _j;
     if (i <= _j)
       j = i - 1;
@@ -289,14 +264,12 @@ void MLPSolution::updateSubsequences(int _i, list<int>::iterator _it, int _j,
   // cout << subsequences[0][n - 1].C << endl;
 }
 
-void MLPSolution::updateAllSubsequences()
-{
+void MLPSolution::updateAllSubsequences() {
   list<int>::iterator begin = this->sequence.begin();
   list<int>::iterator back = this->sequence.end();
 
   int i = 0;
-  for (auto it = begin; it != back; it++)
-  {
+  for (auto it = begin; it != back; it++) {
     this->subsequences[i][i].W = (i > 0);
     this->subsequences[i][i].C = 0;
     this->subsequences[i][i].T = 0;
@@ -320,8 +293,7 @@ void MLPSolution::updateAllSubsequences()
   // this->cost = subsequences[0][n - 1].C;
 }
 
-bool MLPSolution::bestImprovementSwap()
-{
+bool MLPSolution::bestImprovementSwap() {
   list<int>::iterator bestI, bestJ;
   int bestIndexI, bestIndexJ;
   list<int>::iterator begin = this->sequence.begin();
@@ -332,26 +304,22 @@ bool MLPSolution::bestImprovementSwap()
   int end = this->sequence.size() - 1;
 
   int i = 1;
-  for (auto it = next(begin); it != stop; it++)
-  {
+  for (auto it = next(begin); it != stop; it++) {
     list<int>::iterator nextI = next(it);
     int j = i + 1;
-    for (auto jt = nextI; jt != back; jt++)
-    {
+    for (auto jt = nextI; jt != back; jt++) {
       Subsequence sigma =
           Subsequence::concatenate(subsequences[0][i - 1], subsequences[j][j]);
       bool isAdjacent = j != i + 1;
 
-      if (isAdjacent)
-      { // caso da adjacencia;
+      if (isAdjacent) { // caso da adjacencia;
         sigma = Subsequence::concatenate(sigma, subsequences[i + 1][j - 1]);
       }
 
       sigma = Subsequence::concatenate(sigma, subsequences[i][i]);
       sigma = Subsequence::concatenate(sigma, subsequences[j + 1][end]);
 
-      if (sigma.C < bestCost)
-      {
+      if (sigma.C < bestCost) {
         bestCost = sigma.C;
         bestIndexI = i;
         bestIndexJ = j;
@@ -362,8 +330,7 @@ bool MLPSolution::bestImprovementSwap()
     }
   }
 
-  if (bestCost < this->cost)
-  {
+  if (bestCost < this->cost) {
     std::iter_swap(bestI, bestJ);
     this->cost = bestCost;
     // this->updateAllSubsequences();
@@ -374,8 +341,7 @@ bool MLPSolution::bestImprovementSwap()
   return false;
 }
 
-bool MLPSolution::bestImprovement2Opt()
-{
+bool MLPSolution::bestImprovement2Opt() {
   int bestDelta = 0;
   int end = this->sequence.size() - 1;
   double bestCost = this->cost;
@@ -387,18 +353,15 @@ bool MLPSolution::bestImprovement2Opt()
   list<int>::iterator stop = prev(back, 2);
 
   int i = 1;
-  for (auto it = next(begin); it != stop; it++)
-  {
+  for (auto it = next(begin); it != stop; it++) {
     int j = i + 2;
-    for (auto jt = next(it, 2); jt != back; jt++)
-    {
+    for (auto jt = next(it, 2); jt != back; jt++) {
       Subsequence sigma1 =
           Subsequence::concatenate(subsequences[0][i - 1], subsequences[j][i]);
       Subsequence sigma2 =
           Subsequence::concatenate(sigma1, subsequences[j + 1][end]);
 
-      if (sigma2.C < bestCost)
-      {
+      if (sigma2.C < bestCost) {
         bestI = it;
         bestJ = jt;
         bestIndexI = i;
@@ -409,8 +372,7 @@ bool MLPSolution::bestImprovement2Opt()
     }
     i++;
   }
-  if (bestCost < this->cost)
-  {
+  if (bestCost < this->cost) {
     this->performTwoOptSwap(bestI, bestJ);
     this->cost = bestCost;
     // this->updateAllSubsequences();
@@ -421,8 +383,7 @@ bool MLPSolution::bestImprovement2Opt()
   return false;
 }
 
-bool MLPSolution::bestImprovementOrOpt(int size)
-{
+bool MLPSolution::bestImprovementOrOpt(int size) {
   if (size < 1 || size > 3)
     return false;
   int distance = size - 1;
@@ -436,16 +397,37 @@ bool MLPSolution::bestImprovementOrOpt(int size)
   int bestIndexI, bestIndexJ;
   list<int>::iterator bestI, bestJ;
   list<int>::iterator begin = sequence.begin();
+  list<int>::iterator nbegin = next(begin);
   list<int>::iterator back = prev(sequence.end());
-  list<int>::iterator stop = prev(back, size);
+  list<int>::iterator stop = prev(back, size - 1);
 
   int i = 1;
-  for (auto it = next(begin); it != stop; it++)
-  {
+  for (auto it = nbegin; it != stop; it++) {
 
-    int j = i + size;
-    for (auto jt = next(it, size); jt != back; jt++)
-    {
+    int j = 1;
+
+    for (auto jt = nbegin; j < i - size; jt++) {
+      // [0, j][i, i + size - 1][j + 1, i - 1][j+1, end]
+      Subsequence sigma1 = Subsequence::concatenate(
+          subsequences[0][j], subsequences[i][i + distance]);
+      Subsequence sigma2 =
+          Subsequence::concatenate(sigma1, subsequences[j + 1][i - 1]);
+      Subsequence sigma3 =
+          Subsequence::concatenate(sigma2, subsequences[i + size][end]);
+
+      if (sigma3.C < bestCost) {
+        bestCost = sigma3.C;
+        bestI = it;
+        bestJ = jt;
+        bestIndexI = i;
+        bestIndexJ = j;
+      }
+      j++;
+    }
+
+    j = i + size;
+
+    for (auto jt = next(it, size); j < sequence.size() - size; jt++) {
 
       // [0, i-1][i+size, j][i, i + size - 1][j+1, end]
       Subsequence sigma1 = Subsequence::concatenate(subsequences[0][i - 1],
@@ -455,8 +437,7 @@ bool MLPSolution::bestImprovementOrOpt(int size)
       Subsequence sigma3 =
           Subsequence::concatenate(sigma2, subsequences[j + 1][end]);
 
-      if (sigma3.C < bestCost)
-      {
+      if (sigma3.C < bestCost) {
         bestCost = sigma3.C;
         bestI = it;
         bestJ = jt;
@@ -469,15 +450,22 @@ bool MLPSolution::bestImprovementOrOpt(int size)
     i++;
   }
 
-  if (bestCost < this->cost)
-  {
+  if (bestCost < this->cost) {
     list<int>::iterator prevI = prev(bestI);
     list<int>::iterator nextJ = next(bestJ);
 
+    list<int>::iterator nextI = next(bestI, size);
     this->performOrOpt(bestI, bestJ, size);
     this->cost = bestCost;
-    this->updateAllSubsequences();
-    this->updateSubsequences(bestIndexI, next(prevI), bestIndexJ, prev(nextJ));
+
+    if (bestIndexI > bestIndexJ) {
+      this->updateSubsequences(bestIndexJ, bestJ, bestIndexI + distance,
+                               prev(nextI));
+    } else {
+      this->updateSubsequences(bestIndexI, next(prevI), bestIndexJ,
+                               prev(nextJ));
+    }
+    // this->updateAllSubsequences();
     return true;
   }
 

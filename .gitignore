@@ -2,6 +2,7 @@
 *.d
 *.out
 *.csv
+*.numbers
 tsp
 executions*/
 .DS_store
